@@ -33,6 +33,9 @@ class FewShotPosts:
         else:
             return "Long"
 
+    def get_tags(self):
+        return self.unique_tags
+
 if __name__ == "__main__":
     fs = FewShotPosts()
     posts = fs.get_filtered_posts("Short", "English", "Job Search")
