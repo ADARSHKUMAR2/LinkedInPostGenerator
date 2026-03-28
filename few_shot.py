@@ -11,9 +11,19 @@ class FewShotPosts:
     def load_posts(self, file_path):
         with open(file_path, encoding="utf-8") as f:
             posts = json.load(f)
-            df = pd.json_normalize(posts)
-            df['length'] = df['line_count'].apply(self.categorize_length)
-            self.df = df
+            self.df = pd.json_normalize(posts)
+            self.df['length'] = self.df['line_count'].apply(self.categorize_length)
+            # collect unique tags
+            all_tags = self.df['tags'].apply(lambda x: x).sum()
+            self.unique_tags = list(set(all_tags))
+
+    def get_filtered_posts(self, length, language, tag):
+        df_filtered = self.df[
+            (self.df['tags'].apply(lambda tags: tag in tags)) &  # Tags contain 'Influencer'
+            (self.df['language'] == language) &  # Language is 'English'
+            (self.df['length'] == length)  # Line count is less than 5
+            ]
+        return df_filtered.to_dict(orient='records')
 
     def categorize_length(self, line_count):
         if line_count < 5:
@@ -25,3 +35,5 @@ class FewShotPosts:
 
 if __name__ == "__main__":
     fs = FewShotPosts()
+    posts = fs.get_filtered_posts("Short", "English", "Job Search")
+    print(posts)
